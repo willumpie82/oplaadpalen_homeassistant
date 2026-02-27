@@ -1,5 +1,8 @@
 # Oplaadpalen.nl Integration for Home Assistant
 
+[![hacs][hacs-badge]][hacs-url]
+[![GitHub Release][releases-badge]][releases-url]
+
 A Home Assistant custom integration that monitors available charging equipment (EVSEs) at nearby EV charging stations from oplaadpalen.nl.
 
 ## Features
@@ -130,8 +133,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Support
 
-For issues or feature requests, please visit: https://github.com/willemoldemans/oplaadpalen/issues
+For issues or feature requests, please visit: https://github.com/willumpie82/oplaadpalen_homeassistant/issues
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+<!-- Badge Links -->
+[hacs-badge]: https://img.shields.io/badge/HACS-Custom-41BDF5?logo=homeassistantcommunity
+[hacs-url]: https://my.home-assistant.io/redirect/repository/?owner=willumpie82&repository=oplaadpalen_homeassistant&category=integration
+[releases-badge]: https://img.shields.io/github/release/willumpie82/oplaadpalen_homeassistant?label=Release
+[releases-url]: https://github.com/willumpie82/oplaadpalen_homeassistant/releases
