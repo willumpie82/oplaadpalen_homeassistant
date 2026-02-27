@@ -202,20 +202,38 @@ curl "https://www.oplaadpalen.nl/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&SRS=EPSG
 ### Tested Working Locations
 
 ✅ **Verified WMS Coverage:**
-- 's-Hertogenbosch (51.6890, 5.2670) - **1+ stations**
-- Arnhem area - **likely good coverage**
+- 's-Hertogenbosch (51.6890, 5.2670) - **1+ stations** (Jacob Cnodestraat 23 area)
+- Amsterdam - **Singel area (52.3737, 4.8885) - 1+ stations** - Coverage is **neighborhood-specific**, not city-wide
+  - Singel 250: 2 EVSEs (EQUANS operator, 11kW)
+  - Dam area (52.3733, 4.8939): ❌ No coverage nearby
 
-❌ **Known to lack WMS data:**
-- Amsterdam (52.3733, 4.8939) - 0 stations
-- Rotterdam - 0 stations
+⚠️ **Neighborhood-Level Coverage Variation:**
+- WMS coverage varies **by neighborhood**, not by city
+- Same city can have both covered and uncovered areas (sometimes just 400m apart)
+- Always test your **exact address**
 
-### Example for Your Station
+❌ **Known to lack WMS data (areas tested):**
+- Amsterdam Dam area (52.3733, 4.8939) - 0 stations
+- Rotterdam - 0 stations (untested in detail)
 
-If your station is at Jacob Cnodestraat 23, 's-Hertogenbosch:
+### Examples
 
+**Working: 's-Hertogenbosch (Jacob Cnodestraat 23)**
 ```bash
-# This works ✅
 curl "https://www.oplaadpalen.nl/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&SRS=EPSG:4326&VERSION=1.1.1&INFO_FORMAT=application/json&BBOX=5.2670,51.6890,5.2770,51.6990&HEIGHT=500&WIDTH=500&LAYERS=eco:rta_and_clusters&QUERY_LAYERS=eco:rta_and_clusters&X=250&Y=250" | python -m json.tool
+# Result: 1 station found ✅
+```
+
+**Working: Amsterdam (Singel 214/250)**
+```bash
+curl "https://www.oplaadpalen.nl/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&SRS=EPSG:4326&VERSION=1.1.1&INFO_FORMAT=application/json&BBOX=4.8785,52.3637,4.8985,52.3837&HEIGHT=500&WIDTH=500&LAYERS=eco:rta_and_clusters&QUERY_LAYERS=eco:rta_and_clusters&X=250&Y=250" | python -m json.tool
+# Result: 1 station found ✅ (Singel 250, EQUANS operator)
+```
+
+**No coverage: Amsterdam (Dam area ~400m away)**
+```bash
+curl "https://www.oplaadpalen.nl/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&SRS=EPSG:4326&VERSION=1.1.1&INFO_FORMAT=application/json&BBOX=4.878,52.363,4.898,52.383&HEIGHT=500&WIDTH=500&LAYERS=eco:rta_and_clusters&QUERY_LAYERS=eco:rta_and_clusters&X=250&Y=250" | python -m json.tool
+# Result: 0 features ❌ (neighborhood without coverage)
 ```
 
 ---

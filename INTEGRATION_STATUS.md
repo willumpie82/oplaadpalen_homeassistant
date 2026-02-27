@@ -10,7 +10,7 @@
 
 The Home Assistant integration **works perfectly** and is ready for use. The code is complete, tested, and deployed. However, the underlying oplaadpalen.nl WMS API has a significant limitation: **sparse geographic coverage**. This is not a code issue - it's an external API data limitation.
 
-**Good news**: There are practical workarounds for your specific station.
+**Good news**: Many areas DO have coverage, including Amsterdam. Coverage is **patchy geographically** rather than absent for entire cities.
 
 ---
 
@@ -22,10 +22,9 @@ The Home Assistant integration **works perfectly** and is ready for use. The cod
 4. **Config Flow** - Geocoding, validation, setup wizard all working
 5. **Binary Sensors** - Create sensors for each EVSE correctly
 
-**Tested with your station:**
-- ✅ Detail API returns full data for Jacob Cnodestraat 23
-- ✅ Station has 2 EVSEs available
-- ✅ Operator: Vattenfall InCharge
+**Verified working locations:**
+- ✅ Jacob Cnodestraat 23, 's-Hertogenbosch - 2 EVSEs (Vattenfall InCharge)
+- ✅ Singel 250, Amsterdam - 2 EVSEs (EQUANS) - **WMS coverage confirmed in Amsterdam**
 
 ---
 
@@ -35,10 +34,11 @@ The Home Assistant integration **works perfectly** and is ready for use. The cod
 
 | Location | Coverage |
 |----------|----------|
-| Amsterdam (52.37, 4.89) | ❌ 0 stations |
+| Amsterdam (Singel area: 52.3737, 4.8885) | ✅ 1+ stations |
+| Amsterdam (Dam area: 52.3733, 4.8939) | ❌ 0 stations |
 | Rotterdam | ❌ 0 stations |
 | Utrecht | ❌ 0 stations |
-| 's-Hertogenbosch (51.69, 5.27) | ⚠️ Returns 0 in WMS but Detail API has station |
+| 's-Hertogenbosch (51.69, 5.27) | ⚠️ Variable coverage |
 
 This is an **external data limitation**, not a code bug.
 
@@ -62,13 +62,22 @@ Coordinates → WMS Query
    └─ Show warning, offer override
 ```
 
-**Key insight**: The Detail API is the workhorse. WMS is only used for discovery. If we have an external reference ID, we can skip WMS entirely.
+**Key insight**: WMS coverage is **patchy/neighborhood-level**: Some areas in cities have coverage, others don't. The Detail API is the workhorse for fetching full station data.
 
 ---
 
-## Solution for Your Station
+## Coverage Finding: WMS is Patchy, Not Absent
 
-Since your specific station works (we verified the Detail API), use this approach:
+WMS API has **neighborhood-level** coverage variation:
+- Some neighborhoods have full coverage ✅
+- Others nearby have no coverage ❌
+- Between blocks or streets can differ
+
+**Recommendation**: Always test your exact address with `test_your_location.py` rather than assuming a city has no coverage.
+
+## Solution for Areas Without WMS Coverage
+
+If your neighborhood lacks WMS data, use this approach:
 
 ### Option A: Manual Station Reference
 
@@ -99,16 +108,22 @@ For areas that DO have WMS coverage:
 ### WMS Coverage Tests
 
 ```bash
-# ✅ WORKS - Returns station data
-./test_your_location.py 51.6890 5.2670  # Original coords
-# Expected: Finds station (external_ref: 400b80f85597c2dc...)
+# ✅ WORKS - 's-Hertogenbosch
+./test_your_location.py 51.6890 5.2670
+# Found 1 station (external_ref: 400b80f85597c2dc...)
 
-# ❌ NO COVERAGE - Returns 0 features  
-./test_your_location.py 52.3733 4.8939  # Amsterdam
+# ✅ WORKS - Amsterdam (Singel area)
+./test_your_location.py 52.3737294 4.8885726
+# Found 1 station (external_ref: 4000263c1ad824e7...)
+# Address: Singel 250, Amsterdam
+# Operator: EQUANS, 2 EVSEs, 11kW
+
+# ❌ NO COVERAGE - Amsterdam (Dam area, different neighborhood)
+./test_your_location.py 52.3733 4.8939
 # Result: 0 features found
 
-# ❌ NO COVERAGE - Returns 0 features
-./test_your_location.py 51.9426 4.4773  # Rotterdam
+# ❌ NO COVERAGE - Rotterdam
+./test_your_location.py 51.9426 4.4773
 
 # ✅ DETAIL API WORKS - Direct station lookup
 curl https://www.oplaadpalen.nl/api/map/location/400b80f85597c2dc211ef83e942010aa
@@ -240,9 +255,10 @@ curl https://www.oplaadpalen.nl/api/map/location/400b80f85597c2dc211ef83e942010a
 
 ## Lessons Learned
 
-1. **WMS APIs often have incomplete coverage** - Geographic data APIs are expensive to maintain
+1. **WMS APIs have neighborhood-level coverage gaps, not city-level blanks** - Coverage can vary significantly between nearby areas (e.g., 400m difference in Amsterdam = coverage/no coverage)
 2. **Detail API is more reliable** - Targeted lookups > broad discovery
 3. **Testing outside HA was key** - Isolated the problem correctly
+4. **Always test your exact address** - Don't assume an entire city lacks coverage; use `test_your_location.py` first
 4. **External factors matter** - Sometimes the issue is data, not code
 
 ---

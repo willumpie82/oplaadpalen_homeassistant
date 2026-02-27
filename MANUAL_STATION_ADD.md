@@ -131,9 +131,10 @@ chmod +x find_nearby_stations.sh
 
 These are validated station references that work:
 
-| Location | External Reference | Address | EVSE Count |
-|----------|-------------------|---------|-----------|
-| 's-Hertogenbosch | 400b80f85597c2dc211ef83e942010aa | Jacob Cnodestraat 23 | 2 |
+| Location | External Reference | Address | EVSE Count | Operator |
+|----------|-------------------|---------|-----------|----------|
+| Amsterdam - Singel | 4000263c1ad824e7211e897ae42010a8 | Singel 250, Amsterdam | 2 | EQUANS |
+| 's-Hertogenbosch | 400b80f85597c2dc211ef83e942010aa | Jacob Cnodestraat 23 | 2 | Vattenfall InCharge |
 
 Add more as you discover them!
 
