@@ -1,6 +1,9 @@
 {
   "name": "Oplaadpalen.nl",
   "homeassistant": "2023.12.0",
-  "render_readme": true
+  "render_readme": true,
+  "documentation": "https://github.com/willumpie82/oplaadpalen_homeassistant",
+  "issues": "https://github.com/willumpie82/oplaadpalen_homeassistant/issues",
+  "owner": "@willumpie82"
 }
 
