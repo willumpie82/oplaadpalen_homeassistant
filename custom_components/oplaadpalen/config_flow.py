@@ -1,5 +1,4 @@
 """Config flow for Oplaadpalen integration."""
-import asyncio
 import logging
 from typing import Any
 
@@ -96,10 +95,10 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 try:
                     session = async_get_clientsession(self.hass)
                     api = OplaadpalenAPI(session)
-                    stations = await api.async_get_charging_stations(
+                    stations = await api.get_charging_stations(
                         latitude=latitude,
                         longitude=longitude,
-                        radius=float(user_input.get(CONF_RADIUS, 5.0)) * 1000,  # Convert km to m
+                        radius_km=float(user_input.get(CONF_RADIUS, 5.0)),
                     )
                     stations_found = len(stations) > 0
                     
