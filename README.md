@@ -5,6 +5,21 @@
 
 A Home Assistant custom integration that monitors available charging equipment (EVSEs) at nearby EV charging stations from oplaadpalen.nl.
 
+## Project Structure
+
+This project consists of two main components:
+
+1. **oplaadpalen_py/** - Standalone Python library for the Oplaadpalen API
+   - Pure Python client with no Home Assistant dependencies
+   - Can be installed from PyPI as `oplaadpalen-py`
+   - Comprehensive test coverage
+   - Reusable across different projects
+
+2. **custom_components/oplaadpalen/** - Home Assistant integration
+   - Uses the `oplaadpalen_py` library for API calls
+   - Provides binary sensors for EVSE availability
+   - Configuration via Home Assistant UI
+
 ## Features
 
 - 🔌 Monitor EVSE (charging point) availability at nearby stations
@@ -16,7 +31,7 @@ A Home Assistant custom integration that monitors available charging equipment (
 
 ## Installation
 
-### HACS Installation (Recommended)
+### Installation from HACS (Recommended)
 
 1. Open Home Assistant and go to: **HACS → Integrations**
 2. Click the **⋯** (three dots) menu → **Custom repositories**
@@ -146,6 +161,23 @@ For issues or feature requests, please visit: https://github.com/willumpie82/opl
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### Development
+
+The `oplaadpalen_py` library is the core of this project and can be developed independently:
+
+```bash
+cd oplaadpalen_py
+
+# Install in development mode
+pip install -e ".[dev]"
+
+# Run tests
+pytest test_client.py -v --cov=. --cov-report=html
+
+# Build package
+python setup.py sdist bdist_wheel
+```
+
 ### Running Tests
 
 The integration includes a comprehensive test suite. To run tests locally:
@@ -154,8 +186,12 @@ The integration includes a comprehensive test suite. To run tests locally:
 # Install test dependencies
 pip install -r requirements-test.txt
 
-# Run all tests
+# Run all integration tests
 pytest tests/
+
+# Run library tests
+cd oplaadpalen_py
+pytest test_client.py -v
 
 # Run with coverage
 pytest tests/ --cov=custom_components/oplaadpalen --cov-report=html
@@ -164,7 +200,7 @@ pytest tests/ --cov=custom_components/oplaadpalen --cov-report=html
 python run_tests.py
 ```
 
-See [tests/README.md](tests/README.md) for more details on testing.
+See [tests/README.md](tests/README.md) and [oplaadpalen_py/README.md](oplaadpalen_py/README.md) for more details on testing.
 
 ---
 
