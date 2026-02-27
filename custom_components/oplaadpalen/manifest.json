@@ -6,6 +6,9 @@
   "documentation": "https://github.com/willumpie82/oplaadpalen_homeassistant",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/willumpie82/oplaadpalen_homeassistant/issues",
+  "homeassistant": {
+    "min_version": "2023.12.0"
+  },
   "requirements": [
     "geopy>=2.3.0",
     "oplaadpalen-py>=0.1.0"
