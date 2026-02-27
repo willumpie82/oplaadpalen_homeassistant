@@ -90,47 +90,13 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
                 self._abort_if_unique_id_configured()
 
-                # Check if stations are found at the given location
-                stations_found = True
-                try:
-                    session = async_get_clientsession(self.hass)
-                    api = OplaadpalenAPI(session)
-                    stations = await api.get_charging_stations(
-                        latitude=latitude,
-                        longitude=longitude,
-                        radius_km=float(user_input.get(CONF_RADIUS, 5.0)),
-                    )
-                    stations_found = len(stations) > 0
-                    _LOGGER.info(
-                        "Station search: %.4f, %.4f, radius %.1f km → found %d stations",
-                        latitude,
-                        longitude,
-                        float(user_input.get(CONF_RADIUS, 5.0)),
-                        len(stations),
-                    )
-                    
-                    if not stations_found:
-                        _LOGGER.warning(
-                            "No charging stations found at coordinates %.4f, %.4f with radius %.1f km",
-                            latitude,
-                            longitude,
-                            float(user_input.get(CONF_RADIUS, 5.0)),
-                        )
-                except Exception as e:
-                    _LOGGER.warning("Could not verify stations availability: %s", e)
-                    # Don't fail setup, continue anyway
-
-                # If no stations found, show confirmation step
-                if not stations_found:
-                    self.no_stations_context = {
-                        CONF_NAME: user_input.get(CONF_NAME),
-                        CONF_LATITUDE: latitude,
-                        CONF_LONGITUDE: longitude,
-                        CONF_RADIUS: float(user_input.get(CONF_RADIUS, 5.0)),
-                        CONF_UPDATE_INTERVAL: int(user_input.get(CONF_UPDATE_INTERVAL, 300)),
-                    }
-                    return await self.async_step_no_stations()
-
+                # Create entry immediately - coordinator will fetch stations on first update
+                _LOGGER.info(
+                    "Creating Oplaadpalen entry for %.4f, %.4f (radius: %.1f km)",
+                    latitude,
+                    longitude,
+                    float(user_input.get(CONF_RADIUS, 5.0)),
+                )
                 return self.async_create_entry(
                     title=user_input.get(CONF_NAME, f"Oplaadpalen {latitude}, {longitude}"),
                     data={

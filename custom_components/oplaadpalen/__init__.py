@@ -17,13 +17,19 @@ UPDATE_INTERVAL_DEFAULT = 300  # 5 minutes
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Oplaadpalen from a config entry."""
+    _LOGGER.info("Setting up Oplaadpalen entry: %s", entry.entry_id)
+    
     hass.data.setdefault(DOMAIN, {})
     
     # Store the entry
     hass.data[DOMAIN][entry.entry_id] = entry.data
     
     # Setup platforms
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    try:
+        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    except Exception as e:
+        _LOGGER.error("Failed to setup platforms for entry %s: %s", entry.entry_id, e, exc_info=True)
+        return False
     
     return True
 

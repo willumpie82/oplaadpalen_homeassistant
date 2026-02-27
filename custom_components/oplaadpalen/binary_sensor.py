@@ -47,40 +47,46 @@ async def async_setup_entry(
     entities = []
     
     if coordinator.data and "stations" in coordinator.data:
-        for station_idx, station in enumerate(coordinator.data["stations"]):
-            station_name = station.get("address", f"Station {station_idx}")
-            city = station.get("city", "")
-            if city:
-                station_name = f"{station_name}, {city}"
-            
-            # Get EVSEs (charging points)
-            evses = station.get("evses", [])
-            
-            for evse_idx, evse in enumerate(evses):
-                status = evse.get("status", "UNKNOWN")
+        stations = coordinator.data["stations"]
+        if stations:
+            for station_idx, station in enumerate(stations):
+                station_name = station.get("address", f"Station {station_idx}")
+                city = station.get("city", "")
+                if city:
+                    station_name = f"{station_name}, {city}"
                 
-                # Get connector information
-                connectors = evse.get("connectors", [])
-                connector_info = ""
-                if connectors:
-                    connector_types = [c.get("standard", "Unknown") for c in connectors]
-                    power = connectors[0].get("max_power", 0)
-                    connector_info = f" ({', '.join(connector_types)}, {power}W)"
+                # Get EVSEs (charging points)
+                evses = station.get("evses", [])
                 
-                entities.append(
-                    OplaadpalenEVSESensor(
-                        coordinator,
-                        entry.entry_id,
-                        station_idx=station_idx,
-                        evse_idx=evse_idx,
-                        station_name=station_name,
-                        evse_num=evse_idx + 1,
-                        connector_info=connector_info,
-                        status=status,
-                        station_data=station,
-                        evse_data=evse,
+                for evse_idx, evse in enumerate(evses):
+                    status = evse.get("status", "UNKNOWN")
+                    
+                    # Get connector information
+                    connectors = evse.get("connectors", [])
+                    connector_info = ""
+                    if connectors:
+                        connector_types = [c.get("standard", "Unknown") for c in connectors]
+                        power = connectors[0].get("max_power", 0)
+                        connector_info = f" ({', '.join(connector_types)}, {power}W)"
+                    
+                    entities.append(
+                        OplaadpalenEVSESensor(
+                            coordinator,
+                            entry.entry_id,
+                            station_idx=station_idx,
+                            evse_idx=evse_idx,
+                            station_name=station_name,
+                            evse_num=evse_idx + 1,
+                            connector_info=connector_info,
+                            status=status,
+                            station_data=station,
+                            evse_data=evse,
+                        )
                     )
-                )
+        else:
+            _LOGGER.info("⏳ No stations found yet for entry %s. Coordinator will retry on next update.", entry.entry_id)
+    else:
+        _LOGGER.info("⏳ Waiting for first data refresh for entry %s", entry.entry_id)
     
     async_add_entities(entities, update_before_add=True)
 
