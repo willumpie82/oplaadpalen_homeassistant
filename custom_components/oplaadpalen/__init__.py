@@ -7,6 +7,18 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
+# Check for required dependencies
+try:
+    import geopy
+    import oplaadpalen_py
+except ImportError as err:
+    raise ImportError(
+        "oplaadpalen integration requires 'geopy' and 'oplaadpalen-py' packages. "
+        "These should be installed automatically, but they're missing. "
+        "Try uninstalling and reinstalling the integration, or install them manually via pip: "
+        "pip install geopy>=2.3.0 oplaadpalen-py>=0.1.0"
+    ) from err
+
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
 DOMAIN: Final = "oplaadpalen"
