@@ -101,8 +101,8 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_ADDRESS): str,
                 vol.Optional(CONF_LATITUDE): str,
                 vol.Optional(CONF_LONGITUDE): str,
-                vol.Optional(CONF_RADIUS, default=5.0): float,
-                vol.Optional(CONF_UPDATE_INTERVAL, default=300): int,
+                vol.Optional(CONF_RADIUS, default=5.0): vol.Coerce(float),
+                vol.Optional(CONF_UPDATE_INTERVAL, default=300): vol.Coerce(int),
             }
         )
 
@@ -138,11 +138,11 @@ class OplaadpalenOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_RADIUS,
                         default=self.config_entry.data.get(CONF_RADIUS, 5.0),
-                    ): float,
+                    ): vol.Coerce(float),
                     vol.Optional(
                         CONF_UPDATE_INTERVAL,
                         default=self.config_entry.data.get(CONF_UPDATE_INTERVAL, 300),
-                    ): int,
+                    ): vol.Coerce(int),
                 }
             ),
         )
