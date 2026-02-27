@@ -16,22 +16,27 @@ A Home Assistant custom integration that monitors available charging equipment (
 
 ## Installation
 
+### HACS Installation (Recommended)
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://community-assets.home-assistant.io/original/4X/1/a/1/1a129e306bc6a339cf8a2b9222553254a1909b6f.svg)](https://my.home-assistant.io/redirect/repository/?owner=willumpie82&repository=oplaadpalen_homeassistant&category=integration)
+
+Or manually add as custom repository:
+1. Go to HACS → Integrations
+2. Click "Custom repositories"
+3. Add: `https://github.com/willumpie82/oplaadpalen_homeassistant`
+4. Select Category: "Integration"
+5. Install "Oplaadpalen.nl"
+
 ### Manual Installation
 
 1. Clone this repository into your `custom_components` directory:
    ```bash
-   git clone https://github.com/willemoldemans/oplaadpalen.git ~/.homeassistant/custom_components/oplaadpalen
+   git clone https://github.com/willumpie82/oplaadpalen_homeassistant.git ~/.homeassistant/custom_components/oplaadpalen
    ```
 
 2. Restart Home Assistant
 
 3. Go to Settings → Devices & Services → Create Integration and search for "Oplaadpalen"
-
-### HACS Installation
-
-1. Add this repository to HACS as a custom repository
-2. Install the integration
-3. Restart Home Assistant
 
 ## Configuration
 
