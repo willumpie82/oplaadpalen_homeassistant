@@ -25,70 +25,78 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up binary sensors for Oplaadpalen."""
+    _LOGGER.warning("📱 BINARY_SENSOR SETUP STARTING - Entry: %s", entry.entry_id)
     
-    # Create coordinator
-    coordinator = OplaadpalenCoordinator(
-        hass,
-        async_get_clientsession(hass),
-        latitude=entry.data[CONF_LATITUDE],
-        longitude=entry.data[CONF_LONGITUDE],
-        radius=entry.data.get(CONF_RADIUS, 5.0),
-        update_interval=entry.data.get(CONF_UPDATE_INTERVAL, 300),
-    )
-    
-    # Fetch initial data
-    await coordinator.async_config_entry_first_refresh()
-    
-    # Store coordinator
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinator
-    
-    # Create entities
-    entities = []
-    
-    if coordinator.data and "stations" in coordinator.data:
-        stations = coordinator.data["stations"]
-        if stations:
-            for station_idx, station in enumerate(stations):
-                station_name = station.get("address", f"Station {station_idx}")
-                city = station.get("city", "")
-                if city:
-                    station_name = f"{station_name}, {city}"
-                
-                # Get EVSEs (charging points)
-                evses = station.get("evses", [])
-                
-                for evse_idx, evse in enumerate(evses):
-                    status = evse.get("status", "UNKNOWN")
+    try:
+        _LOGGER.warning("🔧 Creating coordinator...")
+        coordinator = OplaadpalenCoordinator(
+            hass,
+            async_get_clientsession(hass),
+            latitude=entry.data[CONF_LATITUDE],
+            longitude=entry.data[CONF_LONGITUDE],
+            radius=entry.data.get(CONF_RADIUS, 5.0),
+            update_interval=entry.data.get(CONF_UPDATE_INTERVAL, 300),
+        )
+        _LOGGER.warning("✅ Coordinator created")
+        
+        _LOGGER.warning("🔄 Fetching initial data...")
+        await coordinator.async_config_entry_first_refresh()
+        _LOGGER.warning("✅ Initial data fetched")
+        
+        hass.data.setdefault(DOMAIN, {})
+        hass.data[DOMAIN][entry.entry_id] = coordinator
+        _LOGGER.warning("✅ Coordinator stored")
+        
+        entities = []
+        
+        if coordinator.data and "stations" in coordinator.data:
+            stations = coordinator.data["stations"]
+            if stations:
+                for station_idx, station in enumerate(stations):
+                    station_name = station.get("address", f"Station {station_idx}")
+                    city = station.get("city", "")
+                    if city:
+                        station_name = f"{station_name}, {city}"
                     
-                    # Get connector information
-                    connectors = evse.get("connectors", [])
-                    connector_info = ""
-                    if connectors:
-                        connector_types = [c.get("standard", "Unknown") for c in connectors]
-                        power = connectors[0].get("max_power", 0)
-                        connector_info = f" ({', '.join(connector_types)}, {power}W)"
+                    evses = station.get("evses", [])
                     
-                    entities.append(
-                        OplaadpalenEVSESensor(
-                            coordinator,
-                            entry.entry_id,
-                            station_idx=station_idx,
-                            evse_idx=evse_idx,
-                            station_name=station_name,
-                            evse_num=evse_idx + 1,
-                            connector_info=connector_info,
-                            status=status,
-                            station_data=station,
-                            evse_data=evse,
+                    for evse_idx, evse in enumerate(evses):
+                        status = evse.get("status", "UNKNOWN")
+                        
+                        connectors = evse.get("connectors", [])
+                        connector_info = ""
+                        if connectors:
+                            connector_types = [c.get("standard", "Unknown") for c in connectors]
+                            power = connectors[0].get("max_power", 0)
+                            connector_info = f" ({', '.join(connector_types)}, {power}W)"
+                        
+                        entities.append(
+                            OplaadpalenEVSESensor(
+                                coordinator,
+                                entry.entry_id,
+                                station_idx=station_idx,
+                                evse_idx=evse_idx,
+                                station_name=station_name,
+                                evse_num=evse_idx + 1,
+                                connector_info=connector_info,
+                                status=status,
+                                station_data=station,
+                                evse_data=evse,
+                            )
                         )
-                    )
+            else:
+                _LOGGER.info("⏳ No stations found yet for entry %s. Coordinator will retry on next update.", entry.entry_id)
         else:
-            _LOGGER.info("⏳ No stations found yet for entry %s. Coordinator will retry on next update.", entry.entry_id)
-    else:
-        _LOGGER.info("⏳ Waiting for first data refresh for entry %s", entry.entry_id)
+            _LOGGER.info("⏳ Waiting for first data refresh for entry %s", entry.entry_id)
+            
+    except Exception as err:
+        _LOGGER.error("❌ ERROR in binary_sensor setup: %s", err, exc_info=True)
+        async_add_entities([], update_before_add=True)
+        return
     
+    _LOGGER.warning("📱 Adding %d entities", len(entities))
     async_add_entities(entities, update_before_add=True)
+    _LOGGER.warning("✅ BINARY_SENSOR SETUP COMPLETE")
 
 
 class OplaadpalenEVSESensor(CoordinatorEntity, BinarySensorEntity):
