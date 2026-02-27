@@ -116,7 +116,7 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Get the options flow for this config entry."""
-        return OplaadpalenOptionsFlow(config_entry)
+        return OplaadpalenOptionsFlow()
 
 
 class OplaadpalenOptionsFlow(config_entries.OptionsFlow):
