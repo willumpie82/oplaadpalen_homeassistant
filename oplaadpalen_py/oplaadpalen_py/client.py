@@ -84,7 +84,10 @@ class OplaadpalenClient:
             raise RuntimeError("No session available. Use as async context manager or provide session.")
 
         try:
-            async with self.session.get(WMS_URL, params=params, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+            async with self.session.get(WMS_URL, params=params, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     features = data.get("features", [])
@@ -133,7 +136,10 @@ class OplaadpalenClient:
 
         try:
             url = f"{DETAIL_API_URL}/{external_reference}"
-            async with self.session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+            async with self.session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     if data.get("status_code") == 1000 and "data" in data:
