@@ -62,21 +62,29 @@ def sample_detail_response():
     }
 
 
+def _mock_aiohttp_response(status, json_data):
+    """Create a properly mocked aiohttp response for async context manager usage."""
+    resp = MagicMock()
+    resp.status = status
+    resp.json = AsyncMock(return_value=json_data)
+    
+    # Make it work as an async context manager
+    resp.__aenter__ = AsyncMock(return_value=resp)
+    resp.__aexit__ = AsyncMock(return_value=None)
+    
+    return resp
+
+
 @pytest.mark.asyncio
 async def test_get_charging_stations_success(mock_session, sample_wms_response, sample_detail_response):
     """Test successful charging station retrieval."""
     client = OplaadpalenClient(mock_session)
     
-    # Mock responses
-    wms_resp = AsyncMock()
-    wms_resp.status = 200
-    wms_resp.json = AsyncMock(return_value=sample_wms_response)
+    wms_resp = _mock_aiohttp_response(200, sample_wms_response)
+    detail_resp = _mock_aiohttp_response(200, sample_detail_response)
     
-    detail_resp = AsyncMock()
-    detail_resp.status = 200
-    detail_resp.json = AsyncMock(return_value=sample_detail_response)
-    
-    mock_session.get = AsyncMock(side_effect=[wms_resp, detail_resp])
+    # Use MagicMock for session.get so it returns responses directly, not as a coroutine
+    mock_session.get = MagicMock(side_effect=[wms_resp, detail_resp])
     
     result = await client.get_charging_stations(52.37403, 4.88969, 5.0)
     
@@ -144,11 +152,8 @@ async def test_get_station_details_success(mock_session, sample_detail_response)
     """Test successful station detail retrieval."""
     client = OplaadpalenClient(mock_session)
     
-    resp = AsyncMock()
-    resp.status = 200
-    resp.json = AsyncMock(return_value=sample_detail_response)
-    
-    mock_session.get = AsyncMock(return_value=resp)
+    resp = _mock_aiohttp_response(200, sample_detail_response)
+    mock_session.get = MagicMock(return_value=resp)
     
     result = await client.get_station_details("ref_123")
     
@@ -282,19 +287,11 @@ async def test_multiple_stations(mock_session):
         }
     }
     
-    wms_resp = AsyncMock()
-    wms_resp.status = 200
-    wms_resp.json = AsyncMock(return_value=wms_response)
+    wms_resp = _mock_aiohttp_response(200, wms_response)
+    detail_resp_1 = _mock_aiohttp_response(200, detail_response_1)
+    detail_resp_2 = _mock_aiohttp_response(200, detail_response_2)
     
-    detail_resp_1 = AsyncMock()
-    detail_resp_1.status = 200
-    detail_resp_1.json = AsyncMock(return_value=detail_response_1)
-    
-    detail_resp_2 = AsyncMock()
-    detail_resp_2.status = 200
-    detail_resp_2.json = AsyncMock(return_value=detail_response_2)
-    
-    mock_session.get = AsyncMock(side_effect=[wms_resp, detail_resp_1, detail_resp_2])
+    mock_session.get = MagicMock(side_effect=[wms_resp, detail_resp_1, detail_resp_2])
     
     result = await client.get_charging_stations(52.37403, 4.88969, 5.0)
     
