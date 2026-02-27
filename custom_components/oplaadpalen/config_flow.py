@@ -165,10 +165,16 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=self.no_stations_context,
             )
 
+        lat = self.no_stations_context.get(CONF_LATITUDE)
+        lon = self.no_stations_context.get(CONF_LONGITUDE)
+        radius = self.no_stations_context.get(CONF_RADIUS, 5.0)
+
         return self.async_show_form(
             step_id="no_stations",
             description_placeholders={
-                "radius": str(self.no_stations_context.get(CONF_RADIUS, 5.0)),
+                "latitude": f"{lat:.4f}",
+                "longitude": f"{lon:.4f}",
+                "radius": str(radius),
             },
         )
 

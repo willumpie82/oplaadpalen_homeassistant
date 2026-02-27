@@ -16,7 +16,7 @@
       },
       "no_stations": {
         "title": "No Charging Stations Found",
-        "description": "No charging stations found within {radius} km of your address.\n\nThis could mean:\n- The area has no public charging stations\n- Your radius is too small\n- The API is temporarily unavailable\n\nDo you want to continue anyway?"
+        "description": "No charging stations found within {radius} km of these coordinates:\n\n**Latitude:** {latitude}\n**Longitude:** {longitude}\n\nPossible solutions:\n- Your address geocoded to the wrong location\n- Try a more specific address (e.g., \"Dam 1, Amsterdam, Netherlands\")\n- The area truly has no public charging stations\n- The API is temporarily unavailable\n\nDo you want to continue anyway?"
       }
     },
     "error": {
