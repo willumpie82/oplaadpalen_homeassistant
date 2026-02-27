@@ -1,15 +1,18 @@
 """Config flow for Oplaadpalen integration."""
+import asyncio
 import logging
 from typing import Any
 
 import voluptuous as vol
 from geopy.geocoders import Nominatim
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
+from .api import OplaadpalenAPI
 from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,11 +29,17 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    def __init__(self) -> None:
+        """Initialize the config flow."""
+        super().__init__()
+        self.no_stations_context: dict[str, Any] = {}
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
+        info_description: str | None = None
 
         if user_input is not None:
             # Validate coordinates
@@ -82,6 +91,40 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
                 self._abort_if_unique_id_configured()
 
+                # Check if stations are found at the given location
+                stations_found = True
+                try:
+                    session = async_get_clientsession(self.hass)
+                    api = OplaadpalenAPI(session)
+                    stations = await api.async_get_charging_stations(
+                        latitude=latitude,
+                        longitude=longitude,
+                        radius=float(user_input.get(CONF_RADIUS, 5.0)) * 1000,  # Convert km to m
+                    )
+                    stations_found = len(stations) > 0
+                    
+                    if not stations_found:
+                        _LOGGER.warning(
+                            "No charging stations found at coordinates %.4f, %.4f with radius %.1f km",
+                            latitude,
+                            longitude,
+                            float(user_input.get(CONF_RADIUS, 5.0)),
+                        )
+                except Exception as e:
+                    _LOGGER.warning("Could not verify stations availability: %s", e)
+                    # Don't fail setup, continue anyway
+
+                # If no stations found, show confirmation step
+                if not stations_found:
+                    self.no_stations_context = {
+                        CONF_NAME: user_input.get(CONF_NAME),
+                        CONF_LATITUDE: latitude,
+                        CONF_LONGITUDE: longitude,
+                        CONF_RADIUS: float(user_input.get(CONF_RADIUS, 5.0)),
+                        CONF_UPDATE_INTERVAL: int(user_input.get(CONF_UPDATE_INTERVAL, 300)),
+                    }
+                    return await self.async_step_no_stations()
+
                 return self.async_create_entry(
                     title=user_input.get(CONF_NAME, f"Oplaadpalen {latitude}, {longitude}"),
                     data={
@@ -108,6 +151,26 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user", data_schema=data_schema, errors=errors
+        )
+
+    async def async_step_no_stations(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle confirmation when no stations are found."""
+        if user_input is not None:
+            return self.async_create_entry(
+                title=self.no_stations_context.get(
+                    CONF_NAME,
+                    f"Oplaadpalen {self.no_stations_context.get(CONF_LATITUDE)}, {self.no_stations_context.get(CONF_LONGITUDE)}",
+                ),
+                data=self.no_stations_context,
+            )
+
+        return self.async_show_form(
+            step_id="no_stations",
+            description_placeholders={
+                "radius": str(self.no_stations_context.get(CONF_RADIUS, 5.0)),
+            },
         )
 
     @staticmethod

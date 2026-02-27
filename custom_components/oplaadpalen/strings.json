@@ -13,6 +13,10 @@
           "radius": "Search Radius (km)",
           "update_interval": "Update Interval (seconds)"
         }
+      },
+      "no_stations": {
+        "title": "No Charging Stations Found",
+        "description": "No charging stations found within {radius} km of your address.\n\nThis could mean:\n- The area has no public charging stations\n- Your radius is too small\n- The API is temporarily unavailable\n\nDo you want to continue anyway?"
       }
     },
     "error": {
