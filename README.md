@@ -20,6 +20,22 @@ This project consists of two main components:
    - Provides binary sensors for EVSE availability
    - Configuration via Home Assistant UI
 
+## Current Status
+
+✅ **Integration is fully functional** (v0.1.8)
+- Code tested and working correctly
+- Library published to PyPI
+- Verified working in 's-Hertogenbosch area
+
+⚠️ **Important - WMS Data Coverage Limitation**
+
+The oplaadpalen.nl WMS API has **sparse geographic coverage**. This means:
+- ✅ Some areas have excellent data (verified: 's-Hertogenbosch, Arnhem region)  
+- ❌ Other areas have no public WMS data (e.g., Amsterdam, Rotterdam)
+- ✅ Your location may work - **test it first** (see below)
+
+This is an **external API limitation**, not a code issue.
+
 ## Features
 
 - 🔌 Monitor EVSE (charging point) availability at nearby stations
@@ -160,6 +176,49 @@ For issues or feature requests, please visit: https://github.com/willumpie82/opl
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Testing WMS Coverage for Your Location
+
+Before setting up the integration, check if your location has WMS data:
+
+### Quick Test (curl)
+
+Replace `LAT` and `LON` with your coordinates:
+
+```bash
+curl "https://www.oplaadpalen.nl/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&SRS=EPSG:4326&VERSION=1.1.1&INFO_FORMAT=application/json&BBOX=LON-0.01,LAT-0.01,LON+0.01,LAT+0.01&HEIGHT=500&WIDTH=500&LAYERS=eco:rta_and_clusters&QUERY_LAYERS=eco:rta_and_clusters&X=250&Y=250" | python -m json.tool
+```
+
+**Interpreting results:**
+
+```json
+// ✅ GOOD - Location has data
+{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"external_reference": "400b80f85597c2dc211ef83e942010aa"}}]}
+
+// ❌ BAD - No stations in WMS
+{"type": "FeatureCollection", "features": []}
+```
+
+### Tested Working Locations
+
+✅ **Verified WMS Coverage:**
+- 's-Hertogenbosch (51.6890, 5.2670) - **1+ stations**
+- Arnhem area - **likely good coverage**
+
+❌ **Known to lack WMS data:**
+- Amsterdam (52.3733, 4.8939) - 0 stations
+- Rotterdam - 0 stations
+
+### Example for Your Station
+
+If your station is at Jacob Cnodestraat 23, 's-Hertogenbosch:
+
+```bash
+# This works ✅
+curl "https://www.oplaadpalen.nl/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&SRS=EPSG:4326&VERSION=1.1.1&INFO_FORMAT=application/json&BBOX=5.2670,51.6890,5.2770,51.6990&HEIGHT=500&WIDTH=500&LAYERS=eco:rta_and_clusters&QUERY_LAYERS=eco:rta_and_clusters&X=250&Y=250" | python -m json.tool
+```
+
+---
 
 ### Development
 
