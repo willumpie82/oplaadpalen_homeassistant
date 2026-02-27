@@ -88,6 +88,7 @@ class OplaadpalenClient:
                 if resp.status == 200:
                     data = await resp.json()
                     features = data.get("features", [])
+                    _LOGGER.debug(f"WMS API returned {len(features)} features")
                     
                     # Fetch detailed information for each station
                     stations_with_details = []
@@ -97,7 +98,10 @@ class OplaadpalenClient:
                             details = await self.get_station_details(external_ref)
                             if details:
                                 stations_with_details.append(details)
+                            else:
+                                _LOGGER.debug(f"No details for reference {external_ref}")
                     
+                    _LOGGER.debug(f"Returning {len(stations_with_details)} stations with details")
                     return stations_with_details
                 else:
                     _LOGGER.error("WMS API error: HTTP %s", resp.status)

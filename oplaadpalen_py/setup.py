@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="oplaadpalen-py",
-    version="0.1.0",
+    version="0.1.1",
     author="Willem Oldemans",
     description="Python client for Oplaadpalen.nl EV charging stations API",
     long_description=long_description,

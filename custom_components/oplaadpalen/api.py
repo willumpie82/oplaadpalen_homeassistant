@@ -23,7 +23,13 @@ class OplaadpalenAPI:
         Uses the oplaadpalen_py library which handles WMS and Detail API calls.
         """
         try:
-            return await self.client.get_charging_stations(latitude, longitude, radius_km)
+            _LOGGER.debug(
+                "Fetching stations: lat=%.4f lon=%.4f radius=%.1f km",
+                latitude, longitude, radius_km
+            )
+            result = await self.client.get_charging_stations(latitude, longitude, radius_km)
+            _LOGGER.debug("Fetched %d charging stations", len(result))
+            return result
         except Exception as err:
             _LOGGER.error("Failed to fetch charging stations: %s", err)
             return []

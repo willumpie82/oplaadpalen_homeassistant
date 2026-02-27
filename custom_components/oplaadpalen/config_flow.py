@@ -101,6 +101,13 @@ class OplaadpalenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         radius_km=float(user_input.get(CONF_RADIUS, 5.0)),
                     )
                     stations_found = len(stations) > 0
+                    _LOGGER.info(
+                        "Station search: %.4f, %.4f, radius %.1f km → found %d stations",
+                        latitude,
+                        longitude,
+                        float(user_input.get(CONF_RADIUS, 5.0)),
+                        len(stations),
+                    )
                     
                     if not stations_found:
                         _LOGGER.warning(
