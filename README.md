@@ -146,6 +146,26 @@ For issues or feature requests, please visit: https://github.com/willumpie82/opl
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### Running Tests
+
+The integration includes a comprehensive test suite. To run tests locally:
+
+```bash
+# Install test dependencies
+pip install -r requirements-test.txt
+
+# Run all tests
+pytest tests/
+
+# Run with coverage
+pytest tests/ --cov=custom_components/oplaadpalen --cov-report=html
+
+# Or use the test script
+python run_tests.py
+```
+
+See [tests/README.md](tests/README.md) for more details on testing.
+
 ---
 
 <!-- Badge Links -->

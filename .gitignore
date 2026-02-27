@@ -36,6 +36,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+.coverage.json
 
 # Translations
 *.mo
@@ -103,3 +104,9 @@ venv.bak/
 # Home Assistant
 config/
 secrets.yaml
+
+# Test Coverage
+htmlcov/
+.coverage
+.pytest_cache/
+
