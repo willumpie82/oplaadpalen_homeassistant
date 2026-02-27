@@ -25,10 +25,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up binary sensors for Oplaadpalen."""
-    _LOGGER.warning("📱 BINARY_SENSOR SETUP STARTING - Entry: %s", entry.entry_id)
-    
     try:
-        _LOGGER.warning("🔧 Creating coordinator...")
         coordinator = OplaadpalenCoordinator(
             hass,
             async_get_clientsession(hass),
@@ -37,15 +34,11 @@ async def async_setup_entry(
             radius=entry.data.get(CONF_RADIUS, 5.0),
             update_interval=entry.data.get(CONF_UPDATE_INTERVAL, 300),
         )
-        _LOGGER.warning("✅ Coordinator created")
         
-        _LOGGER.warning("🔄 Fetching initial data...")
         await coordinator.async_config_entry_first_refresh()
-        _LOGGER.warning("✅ Initial data fetched")
         
         hass.data.setdefault(DOMAIN, {})
         hass.data[DOMAIN][entry.entry_id] = coordinator
-        _LOGGER.warning("✅ Coordinator stored")
         
         entities = []
         
@@ -90,13 +83,11 @@ async def async_setup_entry(
             _LOGGER.info("⏳ Waiting for first data refresh for entry %s", entry.entry_id)
             
     except Exception as err:
-        _LOGGER.error("❌ ERROR in binary_sensor setup: %s", err, exc_info=True)
+        _LOGGER.error("Failed to set up binary_sensor: %s", err, exc_info=True)
         async_add_entities([], update_before_add=True)
         return
     
-    _LOGGER.warning("📱 Adding %d entities", len(entities))
     async_add_entities(entities, update_before_add=True)
-    _LOGGER.warning("✅ BINARY_SENSOR SETUP COMPLETE")
 
 
 class OplaadpalenEVSESensor(CoordinatorEntity, BinarySensorEntity):

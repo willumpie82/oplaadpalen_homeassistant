@@ -21,9 +21,6 @@ except ImportError as err:
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
 
-# Log that the module was imported
-_LOGGER.warning("🚀 OPLAADPALEN MODULE IMPORTED - Version 0.1.14")
-
 DOMAIN: Final = "oplaadpalen"
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR]
 
@@ -32,7 +29,7 @@ UPDATE_INTERVAL_DEFAULT = 300  # 5 minutes
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Oplaadpalen from a config entry."""
-    _LOGGER.warning("⚡ ASYNC_SETUP_ENTRY CALLED - Entry: %s", entry.entry_id)
+    _LOGGER.info("Setting up oplaadpalen entry: %s", entry.entry_id)
     
     hass.data.setdefault(DOMAIN, {})
     
